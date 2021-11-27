@@ -1,0 +1,2 @@
+# CovidGraphBuilder
+コロナ感染者数を取得しslackにポストするGASプログラム
