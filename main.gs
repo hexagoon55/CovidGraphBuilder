@@ -12,7 +12,7 @@
 //https://api.slack.com/methods/files.upload
 
 //COVID-19データ取得設定
-const url = 'https://www.mhlw.go.jp/content/pcr_positive_daily.csv';
+const url = 'https://www3.nhk.or.jp/n-data/opendata/coronavirus/nhk_news_covid19_domestic_daily_data.csv';
 
 //以下は別ファイルで定義
 //var ssid = 'COVIDデータを格納するスプレッドシートのID';
