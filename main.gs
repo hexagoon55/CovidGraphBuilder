@@ -32,7 +32,7 @@ function main() {
   objsToSheet(objs, sheet);
 
   //グラフ描画の準備
-  var range = sheet.getDataRange();
+  var range = sheet.getRange('A1:B'); //先頭2列（日付,国内の感染者数_1日ごとの発表数）のみを取得
   var chart = sheet.newChart().addRange(range).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
   var charts = sheet.getCharts();
   for (var i in charts) {
