@@ -12,7 +12,8 @@
 //https://api.slack.com/methods/files.upload
 
 //COVID-19データ取得設定
-const url = 'https://www3.nhk.or.jp/n-data/opendata/coronavirus/nhk_news_covid19_domestic_daily_data.csv';
+//const url = 'https://www3.nhk.or.jp/n-data/opendata/coronavirus/nhk_news_covid19_domestic_daily_data.csv';  //全国
+const url = 'https://www3.nhk.or.jp/n-data/opendata/coronavirus/nhk_news_covid19_prefectures_daily_data.csv'; //都道府県別
 
 //以下は別ファイルで定義
 //var ssid = 'COVIDデータを格納するスプレッドシートのID';
@@ -32,8 +33,17 @@ function main() {
   objsToSheet(objs, sheet);
 
   //グラフ描画の準備
-  var range = sheet.getRange('A1:B'); //先頭2列（日付,国内の感染者数_1日ごとの発表数）のみを取得
-  var chart = sheet.newChart().addRange(range).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
+  //var range = sheet.getRange('A1:B'); //先頭2列（日付,国内の感染者数_1日ごとの発表数）のみを取得
+  if(sheet.getFilter() != null) {
+     sheet.getFilter().remove();
+  }
+  var rule = SpreadsheetApp.newFilterCriteria().whenFormulaSatisfied('=OR(C2:C="東京都",C2:C="沖縄県")').build();
+  var range = sheet.getDataRange().createFilter().setColumnFilterCriteria(3, rule);
+  var range1 = sheet.getRange('A1:A');
+  var range2 = sheet.getRange('D1:D');
+
+  //var chart = sheet.newChart().addRange(range).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
+  var chart = sheet.newChart().addRange(range1).addRange(range2).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
   var charts = sheet.getCharts();
   for (var i in charts) {
     sheet.removeChart(charts[i]);
