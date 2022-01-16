@@ -7,7 +7,7 @@
 
 スクリプト実行にあたり、以下の変数は main.gs の中でアンコメントして指定するか、あるいは別ファイルを作成してその中で定義してください。
 
-var ssid = 'COVIDデータを格納するスプレッドシートのID';
-var slackUrl   = 'https://slack.com/api/files.upload';
-var token      = 'slackAPIトークン';
-var channel    = 'チャネル名';
+- var ssid = 'COVIDデータを格納するスプレッドシートのID';
+- var slackUrl   = 'https://slack.com/api/files.upload';
+- var token      = 'slackAPIトークン';
+- var channel    = 'チャネル名';
