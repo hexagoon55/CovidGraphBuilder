@@ -30,7 +30,6 @@ if (targetPref == '') {
 }
 
 
-
 //以下は別ファイルで定義
 //var ssid = 'COVIDデータを格納するスプレッドシートのID';
 //var slackUrl   = 'https://slack.com/api/files.upload';
@@ -41,6 +40,7 @@ if (targetPref == '') {
 function main() {
   var spreadsheet = SpreadsheetApp.openById(ssid);
   var sheet = spreadsheet.getSheets()[0];
+  var chart = sheet.newChart();
 
   //CSVデータ取得
   objs = urlfetch(url);
@@ -52,28 +52,17 @@ function main() {
   if(sheet.getFilter() != null) {
     sheet.getFilter().remove();
   }
-  if (targetPref == '') {
-    var rule = SpreadsheetApp.newFilterCriteria().whenDateAfter(new Date(startDate)).build();
-    var range = sheet.getDataRange().createFilter().setColumnFilterCriteria(1, rule); 
-    var range1 = sheet.getRange('A1:B'); //先頭2列（日付,国内の感染者数_1日ごとの発表数）のみを取得
-    var chart = sheet.newChart().addRange(range1).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
-  } else {
-      //C列の都道府県名で絞り込み
-      var rule1 = SpreadsheetApp.newFilterCriteria().whenDateAfter(new Date(startDate)).build();
-      var rule2 = SpreadsheetApp.newFilterCriteria().whenTextContains(targetPref).build();
-      //複数都道府県のデータを表示したい場合は whenFormulaSatisfied を利用
-      //var rule2 = SpreadsheetApp.newFilterCriteria().whenFormulaSatisfied('=OR(C2:C="東京都",C2:C="沖縄県")').build();
-      var range = sheet.getDataRange().createFilter().setColumnFilterCriteria(1, rule1).setColumnFilterCriteria(3, rule2);
-      var range1 = sheet.getRange('A1:A');  //日付
-      var range2 = sheet.getRange('D1:D');  //各地の感染者数
-      var chart = sheet.newChart().addRange(range1).addRange(range2).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
-  }
   var charts = sheet.getCharts();
   for (var i in charts) {
     sheet.removeChart(charts[i]);
   }
 
   //グラフ描画
+  if (targetPref == '') {
+    chart = buildChartZenkoku(sheet, chart);
+  } else {
+    chart = buildChartPref(sheet, chart);
+  }
   sheet.insertChart(chart);
   
   //転送メッセージの準備
@@ -95,7 +84,6 @@ function main() {
 }
 
 function urlfetch(url) {
-  
   var response = UrlFetchApp.fetch(url).getContentText();
   var objs = Utilities.parseCsv(response);
 
@@ -130,8 +118,28 @@ function setDataToSheet(sheet, arrays){
   range.setValues(arrays); 
 }
 
-function pushImageToSlack(chart, text) {
+function buildChartZenkoku(sheet, chart) {
+  var rule = SpreadsheetApp.newFilterCriteria().whenDateAfter(new Date(startDate)).build();
+  var range = sheet.getDataRange().createFilter().setColumnFilterCriteria(1, rule); 
+  var range1 = sheet.getRange('A1:B'); //先頭2列（日付,国内の感染者数_1日ごとの発表数）のみを取得
 
+  return chart.addRange(range1).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
+}
+
+function buildChartPref(sheet, chart){
+  //C列の都道府県名で絞り込み
+  var rule1 = SpreadsheetApp.newFilterCriteria().whenDateAfter(new Date(startDate)).build();
+  var rule2 = SpreadsheetApp.newFilterCriteria().whenTextContains(targetPref).build();
+  //複数都道府県のデータを表示したい場合は whenFormulaSatisfied を利用
+  //var rule2 = SpreadsheetApp.newFilterCriteria().whenFormulaSatisfied('=OR(C2:C="東京都",C2:C="沖縄県")').build();
+  var range = sheet.getDataRange().createFilter().setColumnFilterCriteria(1, rule1).setColumnFilterCriteria(3, rule2);
+  var range1 = sheet.getRange('A1:A');  //日付
+  var range2 = sheet.getRange('D1:D');  //各地の感染者数
+
+  return chart.addRange(range1).addRange(range2).setPosition(1, 3, 0, 0).setChartType(Charts.ChartType.LINE).build();
+}
+
+function pushImageToSlack(chart, text) {
   var payload = {
         'token'      : token,
         'channels'   : channel,
